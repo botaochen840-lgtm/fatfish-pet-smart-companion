@@ -1,0 +1,164 @@
+:root {
+  color-scheme: light;
+  font-family: "Microsoft YaHei UI", "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+/* 透明窗口：只有宠物本体 + 状态信息卡可见，无大卡片背景 */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: transparent; }
+body { user-select: none; }
+
+.pet {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  /* 填满窗口：卡片（顶部）/精灵（底部）按窗口锚定，窗口可尽量缩小 */
+  height: 100%;
+  cursor: grab;
+}
+.pet[data-dragging="true"] { cursor: grabbing; }
+
+/* stage 与 sprite 分离（对齐网页端结构）：stage 承载位移动画、定位与阴影，
+   sprite 承载帧图与朝向翻转——阴影挂 stage，翻转 sprite 时阴影不跟着翻面 */
+.stage {
+  position: absolute;
+  right: 13px;
+  bottom: 14px;
+  width: 128px;
+  height: 128px;
+  filter: drop-shadow(0 9px 7px rgb(12 35 50 / 22%));
+}
+
+.sprite {
+  position: absolute;
+  inset: 0;
+  width: 128px;
+  height: 128px;
+  background-repeat: no-repeat;
+  background-image: url("offline.png");
+  background-size: 128px 128px;
+  background-position: 0 0;
+  image-rendering: auto;
+  transform-origin: 50% 50%;
+}
+
+/* 拖拽提示把手：视觉标记；实际拖拽统一走 sprite 的 JS 拖拽（全屏钳制），
+   不启用系统原生拖动区（原生拖动不受钳制，会越界卡边）。 */
+.drag-handle {
+  position: absolute;
+  z-index: 7;
+  right: 57px;
+  bottom: 121px;
+  width: 34px;
+  height: 15px;
+  color: rgb(49 86 102 / 48%);
+  text-align: center;
+  font: 700 12px/10px sans-serif;
+  letter-spacing: 2px;
+  cursor: grab;
+  opacity: .45;
+}
+.drag-handle:hover { opacity: .9; }
+.drag-handle:active { cursor: grabbing; }
+
+.pulse {
+  position: absolute;
+  z-index: 3;
+  top: 5px;
+  right: 0;
+  width: 176px;
+  min-height: 66px;
+  padding: 10px 12px 9px;
+  color: #173747;
+  background: rgb(240 251 255 / 94%);
+  border: 1px solid rgb(103 181 207 / 45%);
+  border-radius: 14px 14px 4px 14px;
+  box-shadow: 0 8px 24px rgb(26 76 98 / 16%);
+  /* 常驻显示：工作状态 + 余额随时可见（不再依赖悬停） */
+  opacity: 1;
+  transform: none;
+  pointer-events: none;
+}
+
+.pet:hover .pulse,
+.pet[data-attention="true"] .pulse { opacity: 1; transform: none; }
+.pulse strong { display: block; margin-top: 3px; font-size: 14px; line-height: 1.25; }
+/* detail = 余额行：完整显示，不截断 */
+.pulse .detail {
+  display: block;
+  margin-top: 2px;
+  color: #376d84;
+  font-size: 12px;
+  line-height: 1.25;
+}
+.pulse .note {
+  display: block;
+  margin-top: 2px;
+  color: #7a909b;
+  font-size: 10px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pulse .note[hidden] { display: none; }
+
+.actions {
+  position: absolute;
+  z-index: 4;
+  right: 8px;
+  bottom: 4px;
+  display: flex;
+  gap: 5px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+  -webkit-app-region: no-drag;
+}
+.pet:hover .actions { opacity: 1; transform: none; }
+.actions button {
+  width: 29px;
+  height: 29px;
+  padding: 0;
+  border: 1px solid rgb(83 151 178 / 35%);
+  border-radius: 50%;
+  color: #315666;
+  background: rgb(245 253 255 / 94%);
+  box-shadow: 0 3px 9px rgb(31 76 93 / 14%);
+  cursor: pointer;
+  font: 15px/27px "Segoe UI Emoji", sans-serif;
+}
+.actions button:hover { background: #dff7ff; transform: translateY(-1px); }
+.actions button:last-child { font-size: 20px; }
+
+.bubble {
+  position: absolute;
+  z-index: 5;
+  right: 18px;
+  bottom: 156px;
+  max-width: 165px;
+  padding: 7px 10px;
+  color: #234653;
+  background: white;
+  border: 1px solid #b9dfeb;
+  border-radius: 12px 12px 3px 12px;
+  box-shadow: 0 6px 18px rgb(25 70 88 / 16%);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* 位移动画只挂 stage（不碰 sprite 的翻转 transform）。
+   不做上下浮动（float/hop）——桌面端保持静止，只有帧动画给生命力 */
+.pet[data-motion="wiggle"] .stage { animation: wiggle 1.2s ease-in-out infinite; }
+.pet[data-motion="shake"] .stage { animation: shake .4s linear infinite; }
+.pet[data-motion="tilt"] .stage { animation: tilt 1.2s ease-in-out infinite; }
+.pet[data-state="sleep"] .stage { filter: grayscale(.12) drop-shadow(0 9px 7px rgb(12 35 50 / 16%)); }
+
+@keyframes wiggle { 25% { transform: rotate(-2deg); } 75% { transform: rotate(2deg); } }
+@keyframes shake { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+@keyframes tilt { 0%,100% { transform: rotate(0); } 30% { transform: rotate(-4deg); } 70% { transform: rotate(4deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
