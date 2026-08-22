@@ -1,0 +1,15 @@
+node_modules/
+dist/
+out/
+*.log
+
+# 本机自启脚本（含绝对路径，不适合进公开仓库）
+autostart.cmd
+setup-autostart.cmd
+start-pet.ps1
+
+# 备份/临时产物
+*.bak
+*.bak-*
+*~
+.DS_Store
