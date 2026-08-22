@@ -320,7 +320,9 @@ function walkStep(t) {
 // 游走开始后 pickState 的 walk 行才能命中——否则窗口在动却显示陪伴动画）。
 function scheduleWalk(now) {
   const w = cfg.walk ?? CFG_DEFAULTS.walk
-  if (!w.enabled || !connected) return
+  // 未启用、未真连（含离线模拟模式）→ 不散步。离线模拟时宠物只睡觉陪伴，
+  // 不自行移动——避免"离线却在桌面上溜达"的违和感。
+  if (!w.enabled || !connected || simulated) return
   if (currentState !== 'idle') return
   if (sleeping || dragging || transient !== null || walking) return
   if (walkAt === 0) walkAt = now + randomBetween(w.minWaitMs, w.maxWaitMs)
@@ -331,7 +333,7 @@ function tick() {
   const now = Date.now()
   if (transient !== null && now >= transientUntil) resetTransient(now)
   updateIdle(now)
-  // 自动散步已停用（固定位置，不自行移动——避免用户误解"活动范围在变小"）
+  scheduleWalk(now) // 纯 idle 时按间隔自动散步（cfg.walk.enabled 控制；可在 whale-girl /config 关）
   let next = pickState(now)
   // 睡醒视觉边沿：上一帧 sleep、本帧离开 sleep（非拖拽、无瞬发占用）→ 播 wake。
   if (currentState === 'sleep' && next !== 'sleep' && !dragging && transient === null) {
@@ -387,7 +389,9 @@ async function interact(action) {
   transientUntil = Date.now() + TRANSIENT_MS
   render()
   // 离线（内置模拟模式）本地反馈，不依赖 whale-girl 的 reply。
-  if (!connected) {
+  // 注意：模拟模式主进程把 connected 置 true（simulated），所以不能只看 connected，
+  // 要连同 simulated 一起判——否则离线仍会发 fetch → ECONNREFUSED → 报错气泡。
+  if (!connected || simulated) {
     showBubble(action === 'feed' ? '啊呜——好好吃！' : '嘿嘿，玩得好开心～')
     return
   }
