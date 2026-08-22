@@ -1,0 +1,6 @@
+# Register the companion package with DSH. The Electron application connects
+# to whale-girl over its local HTTP API and is launched separately by the OS.
+
+- insert:
+    - id: desktop-pet-companion
+      name: 'fatfish-pet-smart-companion/dsh-plugin'
