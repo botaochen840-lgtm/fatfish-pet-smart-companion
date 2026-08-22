@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大肥鱼</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="pet" class="pet" data-state="sleep" aria-label="DSH 桌面宠物">
+    <section id="pulse" class="pulse" aria-live="polite">
+      <strong id="status">等待 DSH</strong>
+      <span id="detail" class="detail"></span>
+      <span id="note" class="note" hidden></span>
+    </section>
+    <!-- stage/sprite 分离（对齐网页端）：stage 承载位移动画，sprite 承载帧图与朝向翻转，
+         两者不共用 transform，避免动画覆盖翻转（纸片人回归） -->
+    <div id="stage" class="stage">
+      <div id="sprite" class="sprite" role="img" aria-label="鲸鱼娘"></div>
+    </div>
+    <div class="drag-handle" title="拖动大肥鱼" aria-label="拖动大肥鱼">•••</div>
+    <nav id="actions" class="actions" aria-label="宠物操作">
+      <button type="button" data-action="quit" title="退出">×</button>
+    </nav>
+    <div id="bubble" class="bubble" hidden></div>
+  </main>
+  <script src="renderer.js"></script>
+</body>
+</html>
