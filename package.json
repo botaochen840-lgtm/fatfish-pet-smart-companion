@@ -1,0 +1,74 @@
+{
+  "name": "fatfish-pet-smart-companion",
+  "version": "0.1.0",
+  "private": true,
+  "author": {
+    "name": "xiaoshihou",
+    "email": "xiaoshihou514@users.noreply.github.com"
+  },
+  "description": "Smart desktop pet companion (FatFish) for DeepSeek Harness",
+  "desktopName": "fatfish-pet-smart-companion.desktop",
+  "main": "src/main.cjs",
+  "type": "commonjs",
+  "exports": {
+    ".": "./src/main.cjs",
+    "./dsh-plugin": "./dsh-plugin.mjs",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.cjs",
+    "pack:linux": "electron-builder --linux --x64 --dir",
+    "dist:linux": "electron-builder --linux AppImage rpm --x64 --publish never",
+    "pack:win": "electron-builder --win --x64 --dir",
+    "dist:win": "electron-builder --win nsis portable --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.xiaoshihou.fatfish-pet-smart-companion",
+    "productName": "dafeiyu",
+    "executableName": "大肥鱼",
+    "asar": true,
+    "files": [
+      "src/**/*",
+      "package.json",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md"
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "rpm"
+      ],
+      "category": "Utility",
+      "icon": "build/icon.png",
+      "syncDesktopName": true,
+      "artifactName": "fatfish-pet-smart-companion-${version}-linux-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "fatfish-pet-smart-companion-${version}-windows-${arch}-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "fatfish-pet-smart-companion-${version}-windows-${arch}-portable.${ext}"
+    }
+  },
+  "license": "MIT"
+}
