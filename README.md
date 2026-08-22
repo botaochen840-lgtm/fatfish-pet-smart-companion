@@ -79,7 +79,7 @@
 
 ```shell
 # 从发行版页面下载
-# https://github.com/xiaoshihou514/fatfish-pet-smart-companion/releases
+# https://github.com/botaochen840-lgtm/fatfish-pet-smart-companion/releases
 ```
 
 - **Windows**：NSIS 安装包 / 便携版
